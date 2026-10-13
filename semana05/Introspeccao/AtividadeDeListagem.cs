@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class AtividadeDeListagem : Atividade
 {
-    private List<string> _mensagens = new List<string>()
+    private List<string> _listaAvisos = new List<string>()
     {
         "Quem são as pessoas que você aprecia?",
         "Quais são seus pontos fortes pessoais?",
@@ -12,43 +12,61 @@ public class AtividadeDeListagem : Atividade
         "Quem são alguns dos seus heróis pessoais?"
     };
 
-    private Random _random = new Random();
+    private List<string> _avisosRestantes;
+    private Random _geradorAleatorio = new Random();
 
     public AtividadeDeListagem() : base(
         "Atividade de Listagem",
         "Esta atividade ajudará você a refletir sobre as coisas boas da sua vida, fazendo com que você liste o máximo de coisas que puder em uma determinada área.")
     {
+        _avisosRestantes = new List<string>(_listaAvisos);
     }
 
-    public void Executar()
+    public override void Executar()
     {
         ExibirMensagemInicial();
 
-        string mensagem = ObterMensagemAleatoria();
-        Console.WriteLine("Liste o máximo de respostas que puder para o seguinte aviso:");
-        Console.WriteLine($" --- {mensagem} --- ");
-        Console.Write("Você pode começar em: ");
+        string avisoEscolhido = ObterAvisoSemRepeticao();
+
+        Console.WriteLine("Liste o máximo de itens que conseguir para o seguinte tópico:");
+        Console.WriteLine();
+        Console.WriteLine($"  --- \"{avisoEscolhido}\" ---");
+        Console.WriteLine();
+        Console.Write("Você pode começar a listar em: ");
         ExibirContagemRegressiva(5);
         Console.WriteLine();
+        Console.WriteLine();
 
-        int contador = 0;
-        DateTime fim = DateTime.Now.AddSeconds(_duracao);
+        List<string> itensListados = new List<string>();
+        DateTime horarioFim = DateTime.Now.AddSeconds(_duracao);
 
-        while (DateTime.Now < fim)
+        while (DateTime.Now < horarioFim)
         {
             Console.Write("> ");
-            Console.ReadLine();
-            contador++;
+            string resposta = Console.ReadLine();
+
+            if (!string.IsNullOrWhiteSpace(resposta))
+            {
+                itensListados.Add(resposta.Trim());
+            }
         }
 
-        Console.WriteLine($"Você listou {contador} itens!");
+        Console.WriteLine();
+        Console.WriteLine($"Parabéns! Você registrou um total de {itensListados.Count} item(ns) positivo(s)!");
 
         ExibirMensagemFinal();
     }
 
-    private string ObterMensagemAleatoria()
+    private string ObterAvisoSemRepeticao()
     {
-        int indice = _random.Next(_mensagens.Count);
-        return _mensagens[indice];
+        if (_avisosRestantes.Count == 0)
+        {
+            _avisosRestantes = new List<string>(_listaAvisos);
+        }
+
+        int indice = _geradorAleatorio.Next(_avisosRestantes.Count);
+        string aviso = _avisosRestantes[indice];
+        _avisosRestantes.RemoveAt(indice);
+        return aviso;
     }
 }

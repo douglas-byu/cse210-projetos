@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class AtividadeDeReflexao : Atividade
 {
-    private List<string> _mensagens = new List<string>()
+    private List<string> _listaAvisos = new List<string>()
     {
         "Pense em uma ocasião em que você defendeu outra pessoa.",
         "Pense em uma ocasião em que você fez algo realmente difícil.",
@@ -11,7 +11,7 @@ public class AtividadeDeReflexao : Atividade
         "Pense em uma ocasião em que você fez algo verdadeiramente altruísta."
     };
 
-    private List<string> _perguntas = new List<string>()
+    private List<string> _listaPerguntas = new List<string>()
     {
         "Por que essa experiência foi significativa para você?",
         "Você já fez algo assim antes?",
@@ -24,53 +24,75 @@ public class AtividadeDeReflexao : Atividade
         "Como você pode manter essa experiência em mente no futuro?"
     };
 
-    private Random _random = new Random();
+    private List<string> _avisosRestantes;
+    private List<string> _perguntasRestantes;
+    private Random _geradorAleatorio = new Random();
 
     public AtividadeDeReflexao() : base(
         "Atividade de Reflexão",
         "Esta atividade ajudará você a refletir sobre momentos da sua vida em que você demonstrou força e resiliência. Isso ajudará você a reconhecer o poder que você tem e como pode usá-lo em outros aspectos da sua vida.")
     {
+        _avisosRestantes = new List<string>(_listaAvisos);
+        _perguntasRestantes = new List<string>(_listaPerguntas);
     }
 
-    public void Executar()
+    public override void Executar()
     {
         ExibirMensagemInicial();
 
-        string mensagem = ObterMensagemAleatoria();
-        Console.WriteLine("Considere o seguinte aviso:");
+        string avisoEscolhido = ObterAvisoSemRepeticao();
+
+        Console.WriteLine("Considere a seguinte reflexão:");
         Console.WriteLine();
-        Console.WriteLine($" --- {mensagem} --- ");
+        Console.WriteLine($"  --- \"{avisoEscolhido}\" ---");
         Console.WriteLine();
-        Console.WriteLine("Quando você tiver algo em mente, pressione enter para continuar.");
+        Console.WriteLine("Quando tiver um momento em mente, pressione ENTER para continuar...");
         Console.ReadLine();
 
-        Console.WriteLine("Agora reflita sobre cada uma das seguintes perguntas relacionadas a esta experiência.");
+        Console.WriteLine("Agora reflita profundamente sobre cada uma das perguntas a seguir:");
         Console.Write("Você pode começar em: ");
         ExibirContagemRegressiva(5);
         Console.Clear();
 
-        DateTime fim = DateTime.Now.AddSeconds(_duracao);
+        DateTime horarioFim = DateTime.Now.AddSeconds(_duracao);
 
-        while (DateTime.Now < fim)
+        while (DateTime.Now < horarioFim)
         {
-            string pergunta = ObterPerguntaAleatoria();
-            Console.Write($"> {pergunta} ");
-            ExibirAnimacao(5);
+            string perguntaEscolhida = ObterPerguntaSemRepeticao();
+            Console.WriteLine();
+            Console.Write($"> {perguntaEscolhida} ");
+            
+            // Pausa de 5 segundos mostrando spinner enquanto o usuário reflete
+            ExibirAnimacaoSpinner(5);
             Console.WriteLine();
         }
 
         ExibirMensagemFinal();
     }
 
-    private string ObterMensagemAleatoria()
+    private string ObterAvisoSemRepeticao()
     {
-        int indice = _random.Next(_mensagens.Count);
-        return _mensagens[indice];
+        if (_avisosRestantes.Count == 0)
+        {
+            _avisosRestantes = new List<string>(_listaAvisos);
+        }
+
+        int indice = _geradorAleatorio.Next(_avisosRestantes.Count);
+        string aviso = _avisosRestantes[indice];
+        _avisosRestantes.RemoveAt(indice);
+        return aviso;
     }
 
-    private string ObterPerguntaAleatoria()
+    private string ObterPerguntaSemRepeticao()
     {
-        int indice = _random.Next(_perguntas.Count);
-        return _perguntas[indice];
+        if (_perguntasRestantes.Count == 0)
+        {
+            _perguntasRestantes = new List<string>(_listaPerguntas);
+        }
+
+        int indice = _geradorAleatorio.Next(_perguntasRestantes.Count);
+        string pergunta = _perguntasRestantes[indice];
+        _perguntasRestantes.RemoveAt(indice);
+        return pergunta;
     }
 }

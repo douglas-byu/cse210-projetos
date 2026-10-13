@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-public class Atividade
+public abstract class Atividade
 {
     private string _nome;
     private string _descricao;
@@ -12,52 +12,52 @@ public class Atividade
     {
         _nome = nome;
         _descricao = descricao;
+        _duracao = 0;
     }
+
+    public string Nome => _nome;
+    public int Duracao => _duracao;
 
     public void ExibirMensagemInicial()
     {
         Console.Clear();
-        Console.WriteLine($"Bem-vindo à {_nome}.");
+        Console.WriteLine($"=== {_nome.ToUpper()} ===");
         Console.WriteLine();
         Console.WriteLine(_descricao);
         Console.WriteLine();
-        Console.Write("Quanto tempo, em segundos, você gostaria para sua sessão? ");
-        _duracao = int.Parse(Console.ReadLine());
+
+        _duracao = SolicitarDuracaoSessao();
 
         Console.Clear();
-        Console.WriteLine("Prepare-se...");
-        ExibirAnimacao(3);
+        Console.WriteLine("Prepare-se para iniciar a atividade...");
+        ExibirAnimacaoSpinner(4);
         Console.WriteLine();
     }
 
     public void ExibirMensagemFinal()
     {
         Console.WriteLine();
-        Console.WriteLine("Bom trabalho!");
-        ExibirAnimacao(3);
+        Console.WriteLine("Bom trabalho! Você concluiu este exercício.");
+        ExibirAnimacaoSpinner(3);
         Console.WriteLine();
-        Console.WriteLine($"Você concluiu mais {_duracao} segundos da {_nome}.");
-        ExibirAnimacao(3);
+        Console.WriteLine($"Você dedicou {_duracao} segundos à {_nome}.");
+        ExibirAnimacaoSpinner(4);
     }
 
-    public void ExibirAnimacao(int segundos)
+    public void ExibirAnimacaoSpinner(int segundos)
     {
-        List<string> animacao = new List<string>() { "|", "/", "-", "\\" };
-        DateTime fim = DateTime.Now.AddSeconds(segundos);
-        int i = 0;
+        List<string> quadros = new List<string>() { "|", "/", "-", "\\" };
+        DateTime horarioLimite = DateTime.Now.AddSeconds(segundos);
+        int indice = 0;
 
-        while (DateTime.Now < fim)
+        while (DateTime.Now < horarioLimite)
         {
-            string s = animacao[i];
-            Console.Write(s);
+            string simbolo = quadros[indice];
+            Console.Write(simbolo);
             Thread.Sleep(250);
             Console.Write("\b \b");
 
-            i++;
-            if (i >= animacao.Count)
-            {
-                i = 0;
-            }
+            indice = (indice + 1) % quadros.Count;
         }
     }
 
@@ -67,7 +67,30 @@ public class Atividade
         {
             Console.Write(i);
             Thread.Sleep(1000);
-            Console.Write("\b \b");
+
+            // Se for número com 2 dígitos, apaga 2 caracteres
+            string tamanho = i.ToString();
+            string backspaces = new string('\b', tamanho.Length);
+            string espacos = new string(' ', tamanho.Length);
+            Console.Write($"{backspaces}{espacos}{backspaces}");
         }
     }
+
+    private int SolicitarDuracaoSessao()
+    {
+        while (true)
+        {
+            Console.Write("Por quantos segundos você deseja realizar esta atividade? ");
+            string entrada = Console.ReadLine();
+
+            if (int.TryParse(entrada, out int segundos) && segundos > 0)
+            {
+                return segundos;
+            }
+
+            Console.WriteLine("Por favor, informe um número inteiro positivo válido em segundos.");
+        }
+    }
+
+    public abstract void Executar();
 }
